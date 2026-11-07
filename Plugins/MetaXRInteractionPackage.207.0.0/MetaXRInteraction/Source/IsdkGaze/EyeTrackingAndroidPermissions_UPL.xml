@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- EyeTrackingAndroidPermissions_UPL.xml -->
-<root xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidManifestUpdates>
-        <log text="Applying eye tracking permission for IsdkGaze"/>
-        <addPermission android:name="horizonos.permission.EYE_TRACKING"/>
-    </androidManifestUpdates>
-</root>
