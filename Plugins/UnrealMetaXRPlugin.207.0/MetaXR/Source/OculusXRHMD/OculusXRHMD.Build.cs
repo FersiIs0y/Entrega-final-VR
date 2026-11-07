@@ -1,0 +1,178 @@
+// @lint-ignore-every LICENSELINT
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+using System;
+using System.IO;
+
+namespace UnrealBuildTool.Rules
+{
+    public class OculusXRHMD : ModuleRules
+    {
+        public OculusXRHMD(ReadOnlyTargetRules Target) : base(Target)
+        {
+            bUseUnity = true;
+
+            var EngineDir = Path.GetFullPath(Target.RelativeEnginePath);
+
+            PrivateIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(EngineDir, "Source/Runtime/Renderer/Private"),
+                    Path.Combine(EngineDir, "Source/Runtime/OpenGLDrv/Private"),
+                    Path.Combine(EngineDir, "Source/Runtime/Engine/Classes/Components"),
+                    Path.Combine(EngineDir, "Source/Runtime/Engine/Classes/Kismet"),
+                });
+
+            PublicIncludePathModuleNames.AddRange(
+                new string[] {
+                    "Launch",
+                    "ProceduralMeshComponent",
+                    "AndroidPermission",
+                    "OpenXRHMD",
+                });
+
+            PrivateDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "Core",
+                    "CoreUObject",
+                    "Engine",
+                    "EngineSettings",
+                    "InputCore",
+                    "Json",
+                    "RHI",
+                    "RHICore",
+                    "RenderCore",
+                    "Renderer",
+                    "Slate",
+                    "SlateCore",
+                    "ImageWrapper",
+                    "MediaAssets",
+                    "Analytics",
+                    "ProceduralMeshComponent",
+                    "Projects",
+                    "OpenXR",
+                    "OpenXRHMD",
+                });
+
+            // OculusOpenXRLoader is an engine ThirdParty module that UE 5.8 removed;
+            // earlier engine versions still require it for the Meta OpenXR loader.
+            if (Target.Version.MajorVersion == 5 && Target.Version.MinorVersion < 8)
+            {
+                PrivateDependencyModuleNames.Add("OculusOpenXRLoader");
+            }
+
+            // OpenGL and Vulkan are not available on Mac
+            if (Target.Platform != UnrealTargetPlatform.Mac)
+            {
+                PrivateDependencyModuleNames.AddRange(
+                    new string[]
+                    {
+                        "OpenGLDrv",
+                        "VulkanRHI",
+                    });
+            }
+
+            PublicDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "HeadMountedDisplay",
+                    "KhronosOpenXRHeaders",
+                    "OVRPluginXR",
+                    "OculusXRTelemetry",
+                });
+
+            PublicIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(EngineDir, "Plugins/Runtime/OpenXR/Source/OpenXRHMD/Private"),
+                    Path.Combine(EngineDir, "Plugins/Runtime/OpenXR/Source/OpenXRHMD/Internal")
+                });
+
+            if (Target.Version.MajorVersion > 5 || (Target.Version.MajorVersion == 5 && Target.Version.MinorVersion >= 3))
+            {
+                PublicDependencyModuleNames.AddRange(
+                    new string[]
+                    {
+                        "XRBase",
+                    });
+            }
+
+            if (Target.bBuildEditor == true)
+            {
+                PrivateDependencyModuleNames.Add("UnrealEd");
+            }
+
+            // OpenGL is not available on Mac
+            if (Target.Platform != UnrealTargetPlatform.Mac)
+            {
+                AddEngineThirdPartyPrivateStaticDependencies(Target, "OpenGL");
+            }
+
+            if (Target.Platform == UnrealTargetPlatform.Win64)
+            {
+                PrivateDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "HTTP",
+                    "libzip",
+                });
+
+                // D3D
+                {
+                    PrivateDependencyModuleNames.AddRange(
+                        new string[]
+                        {
+                            "D3D11RHI",
+                            "D3D12RHI",
+                        });
+
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "DX11");
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "DX12");
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "NVAPI");
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "DX11Audio");
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "DirectSound");
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "NVAftermath");
+                }
+
+                // Vulkan
+                {
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "Vulkan");
+                }
+
+                // OVRPlugin
+                if (Target.Platform == UnrealTargetPlatform.Win64)
+                {
+                    RuntimeDependencies.Add("$(PluginDir)/Source/Thirdparty/OVRPlugin/OVRPlugin/Lib/" + Target.Platform.ToString() + "/OpenXR/OVRPlugin.dll");
+                }
+            }
+            else if (Target.Platform == UnrealTargetPlatform.Android)
+            {
+                // Vulkan
+                {
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "Vulkan");
+                }
+
+                // AndroidPlugin
+                {
+                    string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
+                    AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "OculusMobile_APL.xml"));
+                }
+            }
+            else if (Target.Platform == UnrealTargetPlatform.Mac)
+            {
+                // OVRPlugin.dylib runtime dependency
+                RuntimeDependencies.Add("$(PluginDir)/Source/Thirdparty/OVRPlugin/OVRPlugin/Lib/Mac/OpenXR/OVRPlugin.dylib");
+            }
+            else if (Target.Platform == UnrealTargetPlatform.Linux)
+            {
+                // Vulkan
+                {
+                    AddEngineThirdPartyPrivateStaticDependencies(Target, "Vulkan");
+                }
+            }
+            AddEngineThirdPartyPrivateStaticDependencies(Target, "OpenXR");
+
+            // Fix error C4756: overflow in constant arithmetic
+            PublicDefinitions.Add("_UCRT_LEGACY_INFINITY");
+        }
+    }
+}
