@@ -1,15 +1,30 @@
-Binaries
-DerivedDataCache
-Intermediate
-Saved
-Plugins/
-.vscode
-.vs
+# Unreal Engine - Directorios principales de compilación y caché
+/Binaries/
+/Intermediate/
+/Saved/
+/DerivedDataCache/
+/Build/Intermediate/
+
+# Plugins externos o del proyecto que no deben rastrearse
+/Plugins/
+
+# IDEs y archivos de proyecto
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
 *.VC.db
 *.opensdf
 *.opendb
 *.sdf
-*.sln
-*.suo
 *.xcodeproj
 *.xcworkspace
+
+# Logs y volcados de error de Unreal
+*.log
+*.dmp
+
+# Archivos basura del sistema operativo
+.DS_Store
+Thumbs.db
